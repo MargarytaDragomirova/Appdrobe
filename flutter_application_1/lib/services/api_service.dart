@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:http/http.dart' as http;
 import '../models/cloth.dart';
 import '../models/outfit.dart';
 
 class ApiService {
-  static const String baseUrl = "http://10.0.2.2:5269";
+  static const String baseUrl = "http://192.168.1.10:5269";
 
   // ================= CLOTHES =================
 
@@ -130,5 +131,30 @@ class ApiService {
   // DELETE outfit
   static Future<void> deleteOutfit(int id) async {
     await http.delete(Uri.parse("$baseUrl/Home/DeleteOutfitApi/$id"));
+  }
+
+  static Future<bool> login(String email, String password) async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/api/account/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
+
+    if (res.statusCode == 200) {
+      final token = jsonDecode(res.body)["token"];
+      await AuthService.saveToken(token);
+      return true;
+    }
+    return false;
+  }
+
+  static Future<bool> register(String email, String password) async {
+    final res = await http.post(
+      Uri.parse("$baseUrl/api/account/register"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
+
+    return res.statusCode == 200;
   }
 }

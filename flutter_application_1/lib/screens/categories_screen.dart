@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/cloth.dart';
 
@@ -49,7 +51,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Categories")),
+      appBar: AppBar(
+        title: const Text("Categories"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await AuthService.logout();
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
           // Category dropdown
@@ -81,7 +100,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       return ListTile(
                         leading: cloth.imagePaths.isNotEmpty
                             ? Image.network(
-                                "http://10.0.2.2:5269${cloth.imagePaths.first}",
+                                ApiService.baseUrl + cloth.imagePaths.first,
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,

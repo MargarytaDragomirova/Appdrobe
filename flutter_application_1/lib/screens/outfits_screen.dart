@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/create_outfit_screen.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import '../services/api_service.dart';
 import '../models/outfit.dart';
 import '../models/cloth.dart';
@@ -25,12 +28,6 @@ class _OutfitsScreenState extends State<OutfitsScreen> {
     setState(() => loading = true);
     try {
       outfits = await ApiService.getOutfits();
-
-      // Fetch clothes for each outfit
-      // for (var outfit in outfits) {
-      //   final fullOutfit = await ApiService.getOutfit(outfit.id);
-      //   outfitClothes[outfit.id] = fullOutfit.clothes;
-      // }
     } catch (e) {
       print("Error fetching outfits: $e");
       outfits = [];
@@ -42,7 +39,51 @@ class _OutfitsScreenState extends State<OutfitsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Outfits")),
+      appBar: AppBar(
+        title: const Text("Outfits"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await AuthService.logout();
+
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
+
+      // ============================
+      // FAB BUTTON TO ADD NEW CLOTH
+      // ============================
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final loggedIn = await AuthService.isLoggedIn();
+
+          if (!loggedIn) {
+            final ok = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+            );
+
+            if (ok != true) return;
+          }
+
+          bool? created = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateOutfitScreen()),
+          );
+
+          if (created == true) fetchOutfits();
+        },
+
+        backgroundColor: Colors.black87,
+        child: const Icon(Icons.add, size: 28),
+      ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : outfits.isEmpty
@@ -62,7 +103,7 @@ class _OutfitsScreenState extends State<OutfitsScreen> {
                             spacing: 5,
                             children: outfit.cloths.map((c) {
                               final imageUrl = c.imagePaths.isNotEmpty
-                                  ? "http://10.0.2.2:5269${c.imagePaths.first.toString()}"
+                                  ? ApiService.baseUrl + c.imagePaths.first
                                   : "";
                               return imageUrl.isNotEmpty
                                   ? Image.network(

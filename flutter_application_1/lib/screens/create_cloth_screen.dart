@@ -62,11 +62,51 @@ class _CreateClothScreenState extends State<CreateClothScreen> {
   ];
   final List<String> locations = ["Wardrobe", "Drawer", "Laundry", "Storage"];
 
-  Future<void> pickImages() async {
+  Future<void> pickFromGallery() async {
     final images = await _picker.pickMultiImage();
     if (images.isNotEmpty) {
-      setState(() => selectedImages = images);
+      setState(() => selectedImages.addAll(images));
     }
+  }
+
+  Future<void> pickFromCamera() async {
+    final image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() => selectedImages.add(image));
+    }
+  }
+
+  void showImageSourceSelector() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Gallery"),
+                onTap: () {
+                  Navigator.pop(context);
+                  pickFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Camera"),
+                onTap: () {
+                  Navigator.pop(context);
+                  pickFromCamera();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> submit() async {
@@ -132,7 +172,7 @@ class _CreateClothScreenState extends State<CreateClothScreen> {
                   children: [
                     // IMAGE PICKER
                     GestureDetector(
-                      onTap: pickImages,
+                      onTap: showImageSourceSelector,
                       child: Container(
                         height: 150,
                         decoration: BoxDecoration(
