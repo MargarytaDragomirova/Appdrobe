@@ -81,7 +81,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       return ListTile(
                         leading: cloth.imagePaths.isNotEmpty
                             ? Image.network(
-                                "http://192.168.1.7:5269${cloth.imagePaths.first}",
+                                "http://10.0.2.2:5269${cloth.imagePaths.first}",
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,

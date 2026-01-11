@@ -27,10 +27,10 @@ class _OutfitsScreenState extends State<OutfitsScreen> {
       outfits = await ApiService.getOutfits();
 
       // Fetch clothes for each outfit
-      for (var outfit in outfits) {
-        final fullOutfit = await ApiService.getOutfit(outfit.id);
-        outfitClothes[outfit.id] = fullOutfit.clothes;
-      }
+      // for (var outfit in outfits) {
+      //   final fullOutfit = await ApiService.getOutfit(outfit.id);
+      //   outfitClothes[outfit.id] = fullOutfit.clothes;
+      // }
     } catch (e) {
       print("Error fetching outfits: $e");
       outfits = [];
@@ -51,19 +51,18 @@ class _OutfitsScreenState extends State<OutfitsScreen> {
               itemCount: outfits.length,
               itemBuilder: (context, index) {
                 final outfit = outfits[index];
-                final clothes = outfitClothes[outfit.id] ?? [];
 
                 return Card(
                   margin: const EdgeInsets.all(8),
                   child: ListTile(
                     title: Text(outfit.name),
-                    subtitle: clothes.isEmpty
+                    subtitle: outfit.cloths.isEmpty
                         ? const Text("No clothes")
                         : Wrap(
                             spacing: 5,
-                            children: clothes.map((c) {
+                            children: outfit.cloths.map((c) {
                               final imageUrl = c.imagePaths.isNotEmpty
-                                  ? "http://192.168.1.7:5269${c.imagePaths.first}"
+                                  ? "http://10.0.2.2:5269${c.imagePaths.first.toString()}"
                                   : "";
                               return imageUrl.isNotEmpty
                                   ? Image.network(

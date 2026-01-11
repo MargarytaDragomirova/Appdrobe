@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/cloth.dart';
 import '../models/outfit.dart';
 
 class ApiService {
-  static const String baseUrl = "http://192.168.1.7:5269";
+  static const String baseUrl = "http://10.0.2.2:5269";
 
   // ================= CLOTHES =================
 
@@ -26,7 +27,7 @@ class ApiService {
     String? season,
     String? location,
   }) async {
-    final uri = Uri.parse("$baseUrl/Home/FilterClothes").replace(
+    final uri = Uri.parse("$baseUrl/FilterClothes").replace(
       queryParameters: {
         if (category != null) 'category': category,
         if (color != null) 'color': color,
@@ -48,6 +49,14 @@ class ApiService {
     await http.delete(Uri.parse("$baseUrl/Home/DeleteCloth?id=$id"));
   }
 
+  static Future<Cloth> getCloth(int id) async {
+    final response = await http.get(Uri.parse("$baseUrl/Home/GetCloth?id=$id"));
+    if (response.statusCode == 200) {
+      return response.body as Cloth;
+    }
+    throw Exception("Failed to find cloth");
+  }
+
   // CREATE cloth with images
   static Future<bool> createCloth({
     required String name,
@@ -57,7 +66,7 @@ class ApiService {
     required String location,
     required List<File> images,
   }) async {
-    final uri = Uri.parse("$baseUrl/Home/CreateCloth");
+    final uri = Uri.parse("$baseUrl/CreateCloth");
     var request = http.MultipartRequest("POST", uri);
 
     request.fields["Name"] = name;
@@ -81,17 +90,21 @@ class ApiService {
   // GET all outfits
   // GET all outfits
   static Future<List<Outfit>> getOutfits() async {
-    final response = await http.get(Uri.parse("$baseUrl/Home/GetOutfits"));
+    final response = await http.get(Uri.parse("$baseUrl/GetOutfits"));
     if (response.statusCode == 200) {
-      List list = jsonDecode(response.body);
-      return list.map((e) => Outfit.fromJson(e)).toList();
+      List<Outfit> outfits = [];
+
+      for (var item in jsonDecode(response.body)) {
+        outfits.add(Outfit.fromJson(item));
+      }
+      return outfits;
     }
     throw Exception("Failed to load outfits");
   }
 
   // GET single outfit by id
   static Future<Outfit> getOutfit(int id) async {
-    final response = await http.get(Uri.parse("$baseUrl/Home/GetOutfit/$id"));
+    final response = await http.get(Uri.parse("$baseUrl/GetOutfit/$id"));
     if (response.statusCode == 200) {
       return Outfit.fromJson(jsonDecode(response.body));
     }
@@ -103,7 +116,7 @@ class ApiService {
     required String name,
     required List<int> clothIds,
   }) async {
-    final uri = Uri.parse("$baseUrl/Home/CreateOutfitApi");
+    final uri = Uri.parse("$baseUrl/CreateOutfitApi");
 
     final response = await http.post(
       uri,
