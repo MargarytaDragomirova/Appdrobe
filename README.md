@@ -17,11 +17,11 @@ kolayca ulaşabilecektir.
 Bağımlılıkları yükleyin:
 
 ```
-dart pub get
+flutter pub get
 ```
 
 Çalıştırın:
 
 ```
-dart run
+flutter run
 ```
